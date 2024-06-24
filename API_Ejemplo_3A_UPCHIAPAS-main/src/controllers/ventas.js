@@ -1,7 +1,6 @@
 const mysql = require('mysql2');
-//Cargar las variables de entorno
 require('dotenv').config();
-// Configuración de la conexión a la base de datos MySQL
+
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -9,58 +8,51 @@ const db = mysql.createConnection({
   database: process.env.DB_DATABASE
 });
 
-// Conexión a la base de datos
 db.connect((err) => {
-  if (err) {
-    throw err;
-  }
-  console.log('Ventas-Conexión a la BD establecida');
+  if (err) throw err;
+  console.log('Venta-Conexión a la BD establecida');
 });
 
-// Obtener todos los elementos
-exports.getAllUsers = (req, res) => {
+exports.getAllVentas = (req, res) => {
   db.query('SELECT * FROM Venta', (err, result) => {
     if (err) {
-      res.status(500).send('Error al obtener los elementos');
-      throw err;
+      console.error('Error al obtener las ventas', err);
+      return res.status(500).send('Error al obtener las ventas');
     }
     res.json(result);
   });
 };
 
-// Agregar un nuevo elemento
-exports.addUser = (req, res) => {
-  const newUser = req.body;
-  db.query('INSERT INTO Venta SET ?', newUser, (err, result) => {
+exports.addVenta = (req, res) => {
+  const newVenta = req.body;
+  db.query('INSERT INTO Venta SET ?', newVenta, (err, result) => {
     if (err) {
-      res.status(500).send('Error al agregar un nuevo elemento');
-      throw err;
+      console.error('Error al agregar la venta', err);
+      return res.status(500).send('Error al agregar la venta');
     }
-    res.status(201).send('Nuevo elemento agregado correctamente');
+    res.status(201).send('Venta agregada correctamente');
   });
 };
 
-// Actualizar un elemento existente
-exports.updateUser = (req, res) => {
-  const userId = req.params.id;
-  const updatedUser = req.body;
-  db.query('UPDATE Venta SET ? WHERE id = ?', [updatedUser, userId], (err, result) => {
+exports.updateVenta = (req, res) => {
+  const ventaId = req.params.id;
+  const updatedVenta = req.body;
+  db.query('UPDATE Venta SET ? WHERE id = ?', [updatedVenta, ventaId], (err, result) => {
     if (err) {
-      res.status(500).send('Error al actualizar el elemento');
-      throw err;
+      console.error('Error al actualizar la venta', err);
+      return res.status(500).send('Error al actualizar la venta');
     }
-    res.send('Elemento actualizado correctamente');
+    res.send('Venta actualizada correctamente');
   });
 };
 
-// Eliminar un elemento
-exports.deleteUser = (req, res) => {
-  const userId = req.params.id;
-  db.query('DELETE FROM Venta WHERE id = ?', userId, (err, result) => {
+exports.deleteVenta = (req, res) => {
+  const ventaId = req.params.id;
+  db.query('DELETE FROM Venta WHERE id = ?', ventaId, (err, result) => {
     if (err) {
-      res.status(500).send('Error al eliminar el elemento');
-      throw err;
+      console.error('Error al eliminar la venta', err);
+      return res.status(500).send('Error al eliminar la venta');
     }
-    res.send('Elemento eliminado correctamente');
+    res.send('Venta eliminada correctamente');
   });
 };
