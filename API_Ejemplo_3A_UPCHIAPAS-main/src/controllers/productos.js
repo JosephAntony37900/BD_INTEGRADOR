@@ -1,4 +1,5 @@
 const mysql = require('mysql2');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const db = mysql.createConnection({
@@ -13,7 +14,23 @@ db.connect((err) => {
   console.log('Productos - Conexión a la BD establecida');
 });
 
-exports.getAllProductos = (req, res) => {
+const authenticateJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      if (err) {
+        return res.sendStatus(403); // Prohibido (token inválido)
+      }
+      req.user = user;
+      next();
+    });
+  } else {
+    res.sendStatus(401); // No autorizado (sin token)
+  }
+};
+
+exports.getAllProductos = [authenticateJWT, (req, res) => {
   db.query('SELECT * FROM Producto', (err, result) => {
     if (err) {
       res.status(500).send('Error al obtener los productos');
@@ -21,9 +38,9 @@ exports.getAllProductos = (req, res) => {
     }
     res.json(result);
   });
-};
+}];
 
-exports.addProducto = (req, res) => {
+exports.addProducto = [authenticateJWT, (req, res) => {
   const newProducto = req.body;
   db.query('INSERT INTO Producto SET ?', newProducto, (err, result) => {
     if (err) {
@@ -32,21 +49,21 @@ exports.addProducto = (req, res) => {
     }
     res.status(201).send('Producto agregado correctamente');
   });
-};
+}];
 
-exports.updateProducto = (req, res) => {
+exports.updateProducto = [authenticateJWT, (req, res) => {
   const productoId = req.params.id;
   const updatedProducto = req.body;
-  db.query('UPDATE Producto SET ? WHERE id_producto = ?', [updatedProducto, productoId], (err, result) => {
+  db.query('UPDATE FROM Producto SET ? WHERE id_producto = ?', [updatedProducto, productoId], (err, result) => {
     if (err) {
       res.status(500).send('Error al actualizar el producto');
       throw err;
     }
     res.send('Producto actualizado correctamente');
   });
-};
+}];
 
-exports.deleteProducto = (req, res) => {
+exports.deleteProducto = [authenticateJWT, (req, res) => {
   const productoId = req.params.id;
   db.query('DELETE FROM Producto WHERE id_producto = ?', productoId, (err, result) => {
     if (err) {
@@ -55,4 +72,4 @@ exports.deleteProducto = (req, res) => {
     }
     res.send('Producto eliminado correctamente');
   });
-};
+}];

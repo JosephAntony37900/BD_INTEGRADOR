@@ -1,5 +1,6 @@
 const mysql = require('mysql2');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -22,8 +23,24 @@ exports.getAllComprobantes = (req, res) => {
   });
 };
 
+const authenticateJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      if (err) {
+        return res.sendStatus(403); // Prohibido (token inválido)
+      }
+      req.user = user;
+      next();
+    });
+  } else {
+    res.sendStatus(401); // No autorizado (sin token)
+  }
+};
+
 // Agregar un nuevo comprobante
-exports.addComprobante = (req, res) => {
+exports.addComprobante = [authenticateJWT, (req, res) => {
   const newComprobante = req.body;
   db.query('INSERT INTO Comprobantes SET ?', newComprobante, (err, result) => {
     if (err) {
@@ -32,23 +49,10 @@ exports.addComprobante = (req, res) => {
     }
     res.status(201).send('Comprobante agregado correctamente');
   });
-};
-
-// Actualizar un comprobante existente
-exports.updateComprobante = (req, res) => {
-  const comprobanteId = req.params.id;
-  const updatedComprobante = req.body;
-  db.query('UPDATE Comprobantes SET ? WHERE id = ?', [updatedComprobante, comprobanteId], (err, result) => {
-    if (err) {
-      res.status(500).send('Error al actualizar el comprobante');
-      throw err;
-    }
-    res.send('Comprobante actualizado correctamente');
-  });
-};
+}];
 
 // Eliminar un comprobante
-exports.deleteComprobante = (req, res) => {
+exports.deleteComprobante = [authenticateJWT, (req, res) => {
   const comprobanteId = req.params.id;
   db.query('DELETE FROM Comprobantes WHERE id = ?', comprobanteId, (err, result) => {
     if (err) {
@@ -56,5 +60,5 @@ exports.deleteComprobante = (req, res) => {
       throw err;
     }
     res.send('Comprobante eliminado correctamente');
-  });
-};
+  });
+}];

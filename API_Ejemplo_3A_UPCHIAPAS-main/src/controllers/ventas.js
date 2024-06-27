@@ -1,4 +1,5 @@
 const mysql = require('mysql2');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const db = mysql.createConnection({
@@ -13,7 +14,23 @@ db.connect((err) => {
   console.log('Venta-Conexión a la BD establecida');
 });
 
-exports.getAllVentas = (req, res) => {
+const authenticateJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      if (err) {
+        return res.sendStatus(403); // Prohibido (token inválido)
+      }
+      req.user = user;
+      next();
+    });
+  } else {
+    res.sendStatus(401); // No autorizado (sin token)
+  }
+};
+
+exports.getAllVentas = [authenticateJWT, (req, res) => {
   db.query('SELECT * FROM Venta', (err, result) => {
     if (err) {
       console.error('Error al obtener las ventas', err);
@@ -21,9 +38,9 @@ exports.getAllVentas = (req, res) => {
     }
     res.json(result);
   });
-};
+}];
 
-exports.addVenta = (req, res) => {
+exports.addVenta = [authenticateJWT, (req, res) => {
   const newVenta = req.body;
   db.query('INSERT INTO Venta SET ?', newVenta, (err, result) => {
     if (err) {
@@ -32,27 +49,8 @@ exports.addVenta = (req, res) => {
     }
     res.status(201).send('Venta agregada correctamente');
   });
-};
+}];
 
-exports.updateVenta = (req, res) => {
-  const ventaId = req.params.id;
-  const updatedVenta = req.body;
-  db.query('UPDATE Venta SET ? WHERE id = ?', [updatedVenta, ventaId], (err, result) => {
-    if (err) {
-      console.error('Error al actualizar la venta', err);
-      return res.status(500).send('Error al actualizar la venta');
-    }
-    res.send('Venta actualizada correctamente');
-  });
-};
 
-exports.deleteVenta = (req, res) => {
-  const ventaId = req.params.id;
-  db.query('DELETE FROM Venta WHERE id = ?', ventaId, (err, result) => {
-    if (err) {
-      console.error('Error al eliminar la venta', err);
-      return res.status(500).send('Error al eliminar la venta');
-    }
-    res.send('Venta eliminada correctamente');
-  });
-};
+//update y delete idk
+

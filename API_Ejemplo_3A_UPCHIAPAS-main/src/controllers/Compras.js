@@ -1,4 +1,5 @@
 const mysql = require('mysql2');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const db = mysql.createConnection({
@@ -22,8 +23,25 @@ exports.getAllCompras = (req, res) => {
   });
 };
 
+
+const authenticateJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      if (err) {
+        return res.sendStatus(403); // Prohibido (token inválido)
+      }
+      req.user = user;
+      next();
+    });
+  } else {
+    res.sendStatus(401); // No autorizado (sin token)
+  }
+};
+
 // Agregar una nueva compra
-exports.addCompra = (req, res) => {
+exports.addCompra = [authenticateJWT, (req, res) => {
   const newCompra = req.body;
   db.query('INSERT INTO Compras SET ?', newCompra, (err, result) => {
     if (err) {
@@ -32,23 +50,23 @@ exports.addCompra = (req, res) => {
     }
     res.status(201).send('Compra agregada correctamente');
   });
-};
+}];
 
 // Actualizar una compra existente
-exports.updateCompra = (req, res) => {
+exports.updateCompra = [authenticateJWT, (req, res) => {
   const compraId = req.params.id;
   const updatedCompra = req.body;
-  db.query('UPDATE Compras SET ? WHERE id = ?', [updatedCompra, compraId], (err, result) => {
+  db.query('UPDATE FROM Compras SET ? WHERE id = ?', [updatedCompra, compraId], (err, result) => {
     if (err) {
       res.status(500).send('Error al actualizar la compra');
       throw err;
     }
     res.send('Compra actualizada correctamente');
   });
-};
+}];
 
 // Eliminar una compra
-exports.deleteCompra = (req, res) => {
+exports.deleteCompra = [authenticateJWT, (req, res) => {
   const compraId = req.params.id;
   db.query('DELETE FROM Compras WHERE id = ?', compraId, (err, result) => {
     if (err) {
@@ -57,4 +75,4 @@ exports.deleteCompra = (req, res) => {
     }
     res.send('Compra eliminada correctamente');
   });
-};
+}];
