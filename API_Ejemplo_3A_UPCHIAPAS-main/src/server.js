@@ -9,6 +9,7 @@ const comprobantesRoutes = require('./routes/Comprobantes');
 const comprasRoutes = require('./routes/Compras');
 const listadeDeseosRoutes = require('./routes/ListaDeDeseos');
 const productosRoutes = require('./routes/productos');
+const comentariosRoutes = require('./routes/Comentarios')
 require('dotenv').config();
 
 const app = express();
@@ -25,6 +26,7 @@ app.use('/comprobantes', comprobantesRoutes);
 app.use('/compras', comprasRoutes);
 app.use('/listadeseos', listadeDeseosRoutes);
 app.use('/productos', productosRoutes);
+app.use('/comentarios', comentariosRoutes);
 
 app.listen(port, () => {
   console.log(`Servidor Express en ejecución en http://localhost:${port}`);
