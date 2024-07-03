@@ -52,5 +52,5 @@ exports.addVenta = [authenticateJWT, (req, res) => {
 }];
 
 
-//update y delete idk
+
 

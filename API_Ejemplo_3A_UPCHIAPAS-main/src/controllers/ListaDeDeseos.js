@@ -10,7 +10,7 @@ const db = mysql.createConnection({
 });
 db.connect((err) => {
     if (err) throw err;
-    console.log('ListaDeDeseos-Conexión a la BD establecida');
+    console.log('Deseos-Conexión a la BD establecida');
   });
 
 
@@ -33,7 +33,7 @@ const authenticateJWT = (req, res, next) => {
 
 // Obtener todas las listas de deseos
 exports.getAllListaDeseos = (req, res) => {
-  db.query('SELECT * FROM ListaDeDeseos', (err, result) => {
+  db.query('SELECT * FROM Deseos', (err, result) => {
     if (err) {
       res.status(500).send('Error al obtener las listas de deseos');
       throw err;
@@ -45,7 +45,7 @@ exports.getAllListaDeseos = (req, res) => {
 // Agregar una nueva lista de deseos
 exports.addListaDeseo = [authenticateJWT, (req, res) => {
   const newListaDeseo = req.body;
-  db.query('INSERT INTO ListaDeDeseos SET ?', newListaDeseo, (err, result) => {
+  db.query('INSERT INTO Deseos SET ?', newListaDeseo, (err, result) => {
     if (err) {
       res.status(500).send('Error al agregar la lista de deseos');
       return;
@@ -58,7 +58,7 @@ exports.addListaDeseo = [authenticateJWT, (req, res) => {
 exports.updateListaDeseo = [authenticateJWT, (req, res) => {
   const listaDeseoId = req.params.id;
   const updatedListaDeseo = req.body;
-  db.query('UPDATE FROM ListaDeDeseos SET ? WHERE id = ?', [updatedListaDeseo, listaDeseoId], (err, result) => {
+  db.query('UPDATE FROM Deseos SET ? WHERE id = ?', [updatedListaDeseo, listaDeseoId], (err, result) => {
     if (err) {
       res.status(500).send('Error al actualizar la lista de deseos');
       throw err;
@@ -70,7 +70,7 @@ exports.updateListaDeseo = [authenticateJWT, (req, res) => {
 // Eliminar una lista de deseos
 exports.deleteListaDeseo = [authenticateJWT, (req, res) => {
   const listaDeseoId = req.params.id;
-  db.query('DELETE FROM ListaDeDeseos WHERE id = ?', listaDeseoId, (err, result) => {
+  db.query('DELETE FROM Deseos WHERE id = ?', listaDeseoId, (err, result) => {
     if (err) {
       res.status(500).send('Error al eliminar la lista de deseos');
       throw err;

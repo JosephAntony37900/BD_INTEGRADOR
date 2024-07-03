@@ -73,3 +73,17 @@ exports.deleteProducto = [authenticateJWT, (req, res) => {
     res.send('Producto eliminado correctamente');
   });
 }];
+
+exports.getIdProducto = [authenticateJWT, (req, res) => {
+  const productoId = req.params.id;
+  db.query('SELECT * FROM Producto WHERE id_producto = ?', [productoId], (err, result) => {
+    if (err) {
+      res.status(500).send('Error al obtener/encontrar el producto');
+      throw err;
+    }
+    res.json({
+      message: 'Producto encontrado correctamente:',
+      data: result
+    });
+  });
+}];

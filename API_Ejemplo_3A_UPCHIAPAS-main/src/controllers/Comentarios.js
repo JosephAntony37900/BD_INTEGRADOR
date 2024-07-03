@@ -75,4 +75,4 @@ exports.deleteComentario = [authenticateJWT, (req, res) => {
     }
     res.send('Comentario eliminada correctamente');
   });
-}];
+}]; 
